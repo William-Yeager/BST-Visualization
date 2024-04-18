@@ -1,0 +1,23 @@
+﻿body {
+    font-family: Cambria;
+    font-size: 20px;
+    background: #D0FCB3;
+    color: #6C5A49;
+}
+
+.title {
+    background: #9BC59D;
+    box-shadow: 2px 2px 2px rgba(34,34,34,0.6);
+}
+
+.bst {
+    font-size: 50px;
+    background: #97a995;
+}
+
+#status-bar {
+    font-size: 30px;
+    font-weight: bold;
+    bottom: 0;
+    left: 5px;
+}

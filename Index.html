@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="MainStyleSheet.css" />
+    <script src="BinarySearch.js"></script>
+    <title>Binary Search Tree</title>
+</head>
+<body onload="onLoad()">
+    <div class="title">
+        <h1>
+            Binary Search Tree
+        </h1>
+        <h4>
+            This application animates the process of a Binary Search Tree and it's various actions (insertion, removal, and searching) as well as being able to print in Inorder, Postorder, and Preorder configurations.
+        </h4>
+    </div>
+    <div class="control">
+        <input type="text" id="addNode" name="addNode">
+        <button name="addButton" onclick="addNode()">Add Node</button>
+        <input type="text" id="deleteNode" name="deleteNode">
+        <button name="deleteButton" onclick="deleteNode()">Delete Node</button>
+        <input type="text" id="searchNode" name="searchNode">
+        <button name="searchButton" onclick="searchNode()">Search Node</button>
+        <button name="inorderButton" onclick="inOrder()">Print InOrder</button>
+        <button name="postorderButton" onclick="postOrder()">Print PostOrder</button>
+        <button name="preorderButton" onclick="preOrder()">Print PreOrder</button>
+    </div>
+    <p id="status-bar" name="status-bar">Please Insert a Node to Begin</p>
+    <form class="bst">
+        <canvas id="bstCanvas" name="bstCanvas" width="1400" height="800"></canvas>
+    </form>
+    
+</body>
+</html>
