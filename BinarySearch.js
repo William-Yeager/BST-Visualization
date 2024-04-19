@@ -1,4 +1,4 @@
-﻿// Create the node class for each item in the tree
+// Create the node class for each item in the tree
 class TreeNode {
     constructor(data) {
         this.data = data;
@@ -14,6 +14,10 @@ class AnimateTree {
         this.height = 800;
         this.length = 1400;
         this.nodeArr = new Array();
+        this.resetPath = null;
+        this.placements = new Array();
+        this.lengthAdd = 60;
+        this.check = true;
     }
 
     animateFirst(tree) {
@@ -30,8 +34,200 @@ class AnimateTree {
         ctx.strokeText(tree.data, this.length/2 - 7 - 5*tree.data/100, 55);
     }
 
-    animateNode(tree, path, data) {
+    animateNode(tree, path, data, order) {
+        if (this.resetPath != null) {
+            this.resetNodes(this.resetPath);
+        }
         console.log("animate node with path: " + path);
+        // Set up canvas vars
+        var canvas = document.getElementById("bstCanvas");
+        var ctx = canvas.getContext("2d");
+        // Set up height vars
+        var tempHeight = 50;
+        var tempLength = this.length / 2;
+        // Iterate through array and find where the new node is
+        for (let i = 0; i < path.length; i++) {
+            let element = path[i];
+            if (element == "left") {
+                // Add new height and length to vars
+                tempHeight += 75;
+                if (i == path.length - 1) {
+                    tempLength -= this.lengthAdd;
+                } else {
+                    tempLength -= 60;
+                }
+            } else if (element == "right") {
+                // Add new height and length to vars
+                tempHeight += 75;
+                if (i == path.length - 1) {
+                    tempLength += this.lengthAdd;
+                } else {
+                    tempLength += 60;
+                }
+            }
+            console.log(tempLength);
+            console.log(element);
+        }
+        // Check if node's place is already taken
+        // If it is, change the amount each node spans by
+        // call animate delete
+        // return
+        let tempLoc = tempHeight.toString() + tempLength.toString();
+        if (this.placements.includes(tempLoc) && this.check) {
+            this.lengthAdd += 60;
+            this.placements = new Array();
+            this.check = false;
+            this.animateDelete("collision", "null", order, tree);
+            this.check = true;
+            return;
+        }
+        // Add to placements array
+        this.placements.push(tempLoc);
+        // Create node
+        ctx.strokeStyle = "Black";
+        ctx.font = "20px Arial";
+        ctx.strokeText(data, tempLength - 5 - 3 * data.toString().length, tempHeight + 5);
+        ctx.beginPath();
+        ctx.arc(tempLength, tempHeight, 30, 0, 2 * Math.PI);
+        ctx.stroke();
+        // Create line
+        let prevNodeArea = 0;
+        let currNodeArea = 0;
+        if (path.length == 1) {
+            if (path[0] == "right") {
+                prevNodeArea = -45 - this.lengthAdd + 60;
+                currNodeArea = 0;
+            } else {
+                prevNodeArea = 40 + this.lengthAdd - 60;
+                currNodeArea = 7;
+            }
+        } else {
+            if (path[0] == "right") {
+                prevNodeArea = -45;
+                currNodeArea = 0;
+            } else {
+                prevNodeArea = 40;
+                currNodeArea = 7;
+            }
+        }
+        ctx.beginPath();
+        ctx.moveTo(tempLength + prevNodeArea, tempHeight - 50);
+        ctx.lineTo(tempLength + currNodeArea, tempHeight - 30);
+        ctx.stroke();
+        console.log(tree);
+    }
+
+    animateSearch(path) {
+        if (this.resetPath != null) {
+            this.resetNodes(this.resetPath);
+        }
+        if (path == "DOES NOT EXIST") {
+            document.getElementById("status-bar").innerHTML = "Node does not exist";
+            return;
+        }
+        console.log("animate search with path: " + path);
+        // Set up canvas vars
+        var canvas = document.getElementById("bstCanvas");
+        var ctx = canvas.getContext("2d");
+        // Set up height vars
+        var tempHeight = 50;
+        var tempLength = this.length / 2;
+        // Iterate through array and find where the new node is
+        for (let i = 0; i < path.length; i++) {
+            let element = path[i];
+            if (element == "left") {
+                // Add new height and length to vars
+                tempHeight += 75;
+                if (i == path.length - 1) {
+                    tempLength -= this.lengthAdd;
+                } else {
+                    tempLength -= 60;
+                }
+            } else if (element == "right") {
+                // Add new height and length to vars
+                tempHeight += 75;
+                if (i == path.length - 1) {
+                    tempLength += this.lengthAdd;
+                } else {
+                    tempLength += 60;
+                }
+            }
+            console.log(element);
+        }
+        // Search node
+        ctx.strokeStyle = "Red";
+        ctx.beginPath();
+        ctx.arc(tempLength, tempHeight, 30, 0, 2 * Math.PI);
+        ctx.stroke();
+        this.resetPath = path;
+    }
+
+    animateDelete(pathNode, pathReplace, addOrder, tree) {
+        console.log("animate delete with path: " + pathNode + " Replaced with: " + pathReplace);
+        // Check to make sure the search isnt active
+        if (this.resetPath != null) {
+            this.resetNodes(this.resetPath);
+        }
+        // Check to make sure it's not collision to reset paths
+        if (pathNode != "collision") {
+            this.placements = new Array();
+        }
+        // Clear canvas
+        var canvas = document.getElementById("bstCanvas");
+        var ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Print to console
+        console.log(addOrder);
+
+        // Create new tree to model the order to animate the add nodes
+        var tempTree = null;
+        var right = false;
+        // Iterate through all nodes to be added
+        for (let i = 0; i < addOrder.length - 1; i++) {
+            let currPath = new Array();
+            var temp = tempTree;
+            var past = temp;
+            if (i == 0) {
+                tempTree = new TreeNode(Number(addOrder[i]));
+                this.animateFirst(tempTree);
+            } else {
+                // Iterate through tree
+                while (temp != null) {
+                    if (addOrder[i] < temp.data) {
+                        currPath.push("left");
+                        past = temp;
+                        temp = temp.left;
+                        right = false;
+                    } else {
+                        currPath.push("right");
+                        past = temp;
+                        temp = temp.right;
+                        right = true;
+                    }
+                }
+                // Add to tree
+                if (right) {
+                    past.right = new TreeNode(Number(addOrder[i]));
+                } else {
+                    // left
+                    past.left = new TreeNode(Number(addOrder[i]));
+                }
+                // Animate current node
+                this.animateNode(tree, currPath.reverse(), Number(addOrder[i]));
+            }
+        }
+    }
+
+    animateDeleteRoot() {
+        console.log("delete root");
+        var canvas = document.getElementById("bstCanvas");
+        var ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    resetNodes(path) {
+        console.log("reset with path: " + path);
         // Set up canvas vars
         var canvas = document.getElementById("bstCanvas");
         var ctx = canvas.getContext("2d");
@@ -52,43 +248,13 @@ class AnimateTree {
             }
             console.log(element);
         }
-        // Create node
+        // Reset node
         ctx.strokeStyle = "Black";
-        ctx.font = "20px Arial";
-        ctx.strokeText(data, tempLength - 5 - 3 * data.toString().length, tempHeight + 5);
         ctx.beginPath();
         ctx.arc(tempLength, tempHeight, 30, 0, 2 * Math.PI);
         ctx.stroke();
-        // Create line
-        let prevNodeArea = 0;
-        let currNodeArea = 0;
-        if (path[0] == "right") {
-            prevNodeArea = -45;
-            currNodeArea = 0;
-        } else {
-            prevNodeArea = 40;
-            currNodeArea = 7;
-        }
-        ctx.beginPath();
-        ctx.moveTo(tempLength + prevNodeArea, tempHeight - 50);
-        ctx.lineTo(tempLength + currNodeArea, tempHeight - 30);
         ctx.stroke();
-        console.log(tree);
-    }
-
-    animateSearch(path) {
-        console.log("animate search with path: " + path);
-        // TODO: ANIMATE SEARCH
-    }
-
-    animateDelete(pathNode, pathReplace) {
-        console.log("animate delete with path: " + pathNode + " Replaced with: " + pathReplace);
-        // TODO: ANIMATE DELETION
-    }
-
-    animateDeleteRoot() {
-        console.log("delete root");
-        // TODO: ANIMATE DELETION ROOT
+        this.resetPath = null;
     }
 }
 
@@ -144,7 +310,8 @@ class BST {
         } else {
             let path = this.placeNode(this.tree, data);
             this.count++;
-            this.animation.animateNode(this.tree, path, data);
+            let addOrder = this.printPreOrder();
+            this.animation.animateNode(this.tree, path, data, addOrder.split(' '));
         }
     }
 
@@ -170,13 +337,21 @@ class BST {
         if (value < currentTree.data) {
             console.log("recursive left");
             let currPath = this.findNode(currentTree.left, value);
-            currPath.push("left");
-            return currPath;
+            if (currPath == "DOES NOT EXIST") {
+                return currPath;
+            } else {
+                currPath.push("left");
+                return currPath;
+            }
         } else {
             console.log("recursive right");
             let currPath = this.findNode(currentTree.right, value);
-            currPath.push("right");
-            return currPath;
+            if (currPath == "DOES NOT EXIST") {
+                return currPath;
+            } else {
+                currPath.push("right");
+                return currPath;
+            }
         }
     }
 
@@ -212,8 +387,8 @@ class BST {
                     } else { 
                         // Return error - can't delete root node unless it is isolated
                         console.log("Cannot delete root node unless all other nodes are deleted");
+                        document.getElementById("status-bar").innerHTML = "Cannot delete root node unless all other nodes are delete";
                         return;
-                        // TODO: Put in place a status bar change
                     }
                 }
 
@@ -225,7 +400,8 @@ class BST {
                         prev.right = curr.left;
                     }
                     console.log("Deleted Node " + curr.data);
-                    this.animation.animateDelete(path, null);
+                    let addOrder = this.printPreOrder();
+                    this.animation.animateDelete(path, null, addOrder.split(' '), this.tree);
                     this.count -= 1;
                     return;
                 }
@@ -237,17 +413,19 @@ class BST {
                         prev.right = curr.right;
                     }
                     console.log("Deleted Node " + curr.data);
-                    this.animation.animateDelete(path, "right");
+                    let addOrder = this.printPreOrder();
+                    this.animation.animateDelete(path, "right", addOrder.split(' '), this.tree);
                     this.count -= 1;
                     return;
                 } else if (curr.right == null) {
                     if (prev.data > curr.data) {
-                        prev.left = curr.right;
+                        prev.left = curr.left;
                     } else {
-                        prev.right = curr.right;
+                        prev.right = curr.left;
                     }
                     console.log("Deleted Node " + curr.data);
-                    this.animation.animateDelete(path, "left");
+                    let addOrder = this.printPreOrder();
+                    this.animation.animateDelete(path, "left", addOrder.split(' '), this.tree);
                     this.count -= 1;
                     return;
                 } else {
@@ -281,7 +459,8 @@ class BST {
                     }
                     
                     console.log("Deleted Node " + curr.data);
-                    this.animation.animateDelete(path, successorPath);
+                    let addOrder = this.printPreOrder();
+                    this.animation.animateDelete(path, successorPath, addOrder.split(' '), this.tree);
                     this.count -= 1;
                     return;
                 }
@@ -299,7 +478,7 @@ class BST {
 
         // Couldn't find node
         console.log("Node does not exist");
-        // TODO: Set status bar to does not exist
+        document.getElementById("status-bar").innerHTML = "Node does not exist";
     }
 
     // Print methods
@@ -381,13 +560,13 @@ function addNode() {
 }
 
 function searchNode() {
-    bstTree.searchNode(Number(document.getElementById('searchNode').value));
     document.getElementById("status-bar").innerHTML = "Animation Complete";
+    bstTree.searchNode(Number(document.getElementById('searchNode').value));
 }
 
 function deleteNode() {
-    bstTree.deleteNode(Number(document.getElementById('deleteNode').value));
     document.getElementById("status-bar").innerHTML = "Animation Complete";
+    bstTree.deleteNode(Number(document.getElementById('deleteNode').value));
 }
 
 function inOrder() {
