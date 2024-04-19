@@ -12,7 +12,7 @@ class AnimateTree {
     constructor() {
         // Global animation vars
         this.height = 800;
-        this.length = window.innerWidth/2;
+        this.length = window.innerWidth/1.25;
         this.nodeArr = new Array();
         this.resetPath = null;
         this.placements = new Array();
